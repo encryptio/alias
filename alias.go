@@ -3,8 +3,8 @@
 package alias
 
 import (
-	"math/rand"
 	"errors"
+	"math/rand"
 )
 
 type Alias struct {
