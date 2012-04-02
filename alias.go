@@ -25,11 +25,9 @@ type fpiece struct {
 
 // Create a new alias object.
 // For example,
-//   var v = alias.New([]float64{8,10,2}, 0)
+//   var v = alias.New([]float64{8,10,2}, 12345)
 // creates an alias that returns 0 40% of the time, 1 50% of the time, and
 // 2 10% of the time.
-//
-// If the seed argument is zero, it is initialized to rand.Int63().
 func New(prob []float64, seed int64) (*Alias, error) {
 
 	// This implementation is based on
@@ -39,10 +37,6 @@ func New(prob []float64, seed int64) (*Alias, error) {
 
 	if n < 1 {
 		return nil, errors.New("Too few probabilities")
-	}
-
-	if seed == 0 {
-		seed = rand.Int63()
 	}
 
 	var al Alias
