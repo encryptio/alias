@@ -132,7 +132,7 @@ func (al *Alias) Gen() int32 {
 	return w
 }
 
-// TableAlias returns the alias table used for generation.
+// TableAlias returns a copy of the alias table used for generation.
 func (al *Alias) TableAlias() []int32 {
 	t := make([]int32, al.n)
 	for i := 0; i < int(al.n); i++ {
@@ -141,7 +141,7 @@ func (al *Alias) TableAlias() []int32 {
 	return t
 }
 
-// TableProb returns the probability table used for generation
+// TableProb returns a copy of the probability table used for generation
 func (al *Alias) TableProb() []int32 {
 	t := make([]int32, al.n)
 	for i := 0; i < int(al.n); i++ {
