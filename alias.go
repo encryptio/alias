@@ -1,3 +1,7 @@
+// Copyright (c) 2012, Jack Christopher Kastorff
+// All rights reserved.
+// BSD Licensed, see LICENSE for details.
+
 // The alias package picks items from a discrete distribution
 // efficiently using the alias method.
 package alias
