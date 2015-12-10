@@ -17,12 +17,12 @@ type Alias struct {
 
 type fpiece struct {
 	p float64
-	a int32
+	a uint32
 }
 
 type ipiece struct {
-	p int32 // [0,2^31)
-	a int32
+	p uint32 // [0,2^31)
+	a uint32
 }
 
 // Create a new alias object.
@@ -71,10 +71,10 @@ func New(prob []float64) (*Alias, error) {
 		// others in the small stack
 		if p >= 1 {
 			lgBot--
-			twins[lgBot] = fpiece{p, int32(i)}
+			twins[lgBot] = fpiece{p, uint32(i)}
 		} else {
 			smTop++
-			twins[smTop] = fpiece{p, int32(i)}
+			twins[smTop] = fpiece{p, uint32(i)}
 		}
 	}
 
@@ -86,7 +86,7 @@ func New(prob []float64) (*Alias, error) {
 		g := twins[lgBot]
 		lgBot++
 
-		al.t[l.a].p = int32(l.p * (1<<31 - 1))
+		al.t[l.a].p = uint32(l.p * (1<<31 - 1))
 		al.t[l.a].a = g.a
 
 		g.p = (g.p + l.p) - 1
@@ -116,9 +116,9 @@ func New(prob []float64) (*Alias, error) {
 }
 
 // Generates a random number according to the distribution using the rng passed.
-func (al *Alias) Gen(rng *rand.Rand) int32 {
-	ri := rng.Int31()
-	w := ri % int32(len(al.t))
+func (al *Alias) Gen(rng *rand.Rand) uint32 {
+	ri := uint32(rng.Int31())
+	w := ri % uint32(len(al.t))
 	if ri > al.t[w].p {
 		return al.t[w].a
 	}
