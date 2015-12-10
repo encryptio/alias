@@ -1,4 +1,4 @@
-// Copyright (c) 2012, Jack Christopher Kastorff
+// Copyright (c) 2012-2015, Jack Christopher Kastorff
 // All rights reserved.
 // BSD Licensed, see LICENSE for details.
 
