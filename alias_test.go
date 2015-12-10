@@ -19,14 +19,16 @@ func testDistribution(t *testing.T, dist []float64, seed int64) {
 		sum += dist[i]
 	}
 
-	a, err := New(dist, seed)
+	a, err := New(dist)
 	if err != nil {
 		t.Error("Got an error during creation:", err)
 	}
 
+	rng := rand.New(rand.NewSource(seed))
+
 	counts := make([]int64, len(dist))
 	for i := 0; i < distributionCount; i++ {
-		counts[a.Gen()]++
+		counts[a.Gen(rng)]++
 	}
 
 	for i := 0; i < len(dist); i++ {
@@ -53,15 +55,17 @@ func benchGen(b *testing.B, size int) {
 		arr[i] = rand.Float64()
 	}
 
-	a, err := New(arr, 99)
+	a, err := New(arr)
 	if err != nil {
 		b.Error("Got an error during creation:", err)
 	}
 
+	rng := rand.New(rand.NewSource(99))
+
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		a.Gen()
+		a.Gen(rng)
 	}
 }
 
@@ -96,7 +100,7 @@ func benchCreationSize(b *testing.B, size int) {
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		New(arr, int64(i))
+		New(arr)
 	}
 }
 

@@ -12,9 +12,8 @@ import (
 )
 
 type Alias struct {
-	rng *rand.Rand
-	t   []ipiece
-	n   int32
+	t []ipiece
+	n int32
 }
 
 type fpiece struct {
@@ -29,10 +28,10 @@ type ipiece struct {
 
 // Create a new alias object.
 // For example,
-//   var v = alias.New([]float64{8,10,2}, 12345)
+//   var v = alias.New([]float64{8,10,2})
 // creates an alias that returns 0 40% of the time, 1 50% of the time, and
 // 2 10% of the time.
-func New(prob []float64, seed int64) (*Alias, error) {
+func New(prob []float64) (*Alias, error) {
 
 	// This implementation is based on
 	// http://www.keithschwarz.com/darts-dice-coins/
@@ -43,9 +42,6 @@ func New(prob []float64, seed int64) (*Alias, error) {
 		return nil, errors.New("Too few probabilities")
 	}
 
-	var al Alias
-	al.rng = rand.New(rand.NewSource(seed))
-
 	total := float64(0)
 	for _, v := range prob {
 		if v <= 0 {
@@ -54,6 +50,7 @@ func New(prob []float64, seed int64) (*Alias, error) {
 		total += v
 	}
 
+	var al Alias
 	al.t = make([]ipiece, n)
 	al.n = int32(n)
 
@@ -120,9 +117,9 @@ func New(prob []float64, seed int64) (*Alias, error) {
 	return &al, nil
 }
 
-// Generates a random number according to the distribution.
-func (al *Alias) Gen() int32 {
-	ri := al.rng.Int31()
+// Generates a random number according to the distribution using the rng passed.
+func (al *Alias) Gen(rng *rand.Rand) int32 {
+	ri := rng.Int31()
 	w := ri % al.n
 	if ri > al.t[w].p {
 		return al.t[w].a
