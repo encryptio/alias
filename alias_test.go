@@ -11,7 +11,7 @@ import (
 )
 
 const distributionCount = 1000000
-const errorBound = 0.01
+const errorBound = 0.001
 
 func testDistribution(t *testing.T, dist []float64, seed int64) {
 	sum := float64(0)
