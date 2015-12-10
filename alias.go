@@ -13,17 +13,17 @@ import (
 )
 
 type Alias struct {
-	t []ipiece
+	table []ipiece
 }
 
 type fpiece struct {
-	p float64
-	a uint32
+	prob  float64
+	alias uint32
 }
 
 type ipiece struct {
-	p uint32 // [0,2^31)
-	a uint32
+	prob  uint32 // [0,2^31)
+	alias uint32
 }
 
 // Create a new alias object.
@@ -55,7 +55,7 @@ func New(prob []float64) (*Alias, error) {
 	}
 
 	var al Alias
-	al.t = make([]ipiece, n)
+	al.table = make([]ipiece, n)
 
 	// Michael Vose's algorithm
 
@@ -91,13 +91,13 @@ func New(prob []float64) (*Alias, error) {
 		g := twins[lgBot]
 		lgBot++
 
-		al.t[l.a].p = uint32(l.p * (1<<31 - 1))
-		al.t[l.a].a = g.a
+		al.table[l.alias].prob = uint32(l.prob * (1<<31 - 1))
+		al.table[l.alias].alias = g.alias
 
-		g.p = (g.p + l.p) - 1
+		g.prob = (g.prob + l.prob) - 1
 
 		// put the rest of the large block back in a list
-		if g.p < 1 {
+		if g.prob < 1 {
 			smTop++
 			twins[smTop] = g
 		} else {
@@ -108,13 +108,13 @@ func New(prob []float64) (*Alias, error) {
 
 	// clear out any remaining blocks
 	for i := n - 1; i >= lgBot; i-- {
-		al.t[twins[i].a].p = 1<<31 - 1
+		al.table[twins[i].alias].prob = 1<<31 - 1
 	}
 
 	// there shouldn't be anything here, but sometimes floating point
 	// errors send a probability just under 1.
 	for i := 0; i <= smTop; i++ {
-		al.t[twins[i].a].p = 1<<31 - 1
+		al.table[twins[i].alias].prob = 1<<31 - 1
 	}
 
 	return &al, nil
@@ -123,20 +123,20 @@ func New(prob []float64) (*Alias, error) {
 // Generates a random number according to the distribution using the rng passed.
 func (al *Alias) Gen(rng *rand.Rand) uint32 {
 	ri := uint32(rng.Int31())
-	w := ri % uint32(len(al.t))
-	if ri > al.t[w].p {
-		return al.t[w].a
+	w := ri % uint32(len(al.table))
+	if ri > al.table[w].prob {
+		return al.table[w].alias
 	}
 	return w
 }
 
 // MarshalBinary implements encoding.BinaryMarshaller.
 func (al *Alias) MarshalBinary() ([]byte, error) {
-	out := make([]byte, len(al.t)*8)
-	for i, piece := range al.t {
+	out := make([]byte, len(al.table)*8)
+	for i, piece := range al.table {
 		bin := out[i*8 : 8+i*8]
-		binary.LittleEndian.PutUint32(bin[0:4], piece.p)
-		binary.LittleEndian.PutUint32(bin[4:8], piece.a)
+		binary.LittleEndian.PutUint32(bin[0:4], piece.prob)
+		binary.LittleEndian.PutUint32(bin[4:8], piece.alias)
 	}
 	return out, nil
 }
@@ -151,21 +151,21 @@ func (al *Alias) UnmarshalBinary(p []byte) error {
 		return errors.New("data too large")
 	}
 
-	al.t = make([]ipiece, (len(p))/8)
-	for i := range al.t {
+	al.table = make([]ipiece, (len(p))/8)
+	for i := range al.table {
 		bin := p[i*8 : 8+i*8]
-		p := binary.LittleEndian.Uint32(bin[0:4])
-		a := binary.LittleEndian.Uint32(bin[4:8])
+		prob := binary.LittleEndian.Uint32(bin[0:4])
+		alias := binary.LittleEndian.Uint32(bin[4:8])
 
-		if p >= 1<<31 {
+		if prob >= 1<<31 {
 			return errors.New("bad data: probability out of range")
 		}
-		if a >= uint32(len(al.t)) {
+		if alias >= uint32(len(al.table)) {
 			return errors.New("bad data: alias target out of range")
 		}
 
-		al.t[i].p = p
-		al.t[i].a = a
+		al.table[i].prob = prob
+		al.table[i].alias = alias
 	}
 
 	return nil
