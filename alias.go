@@ -13,16 +13,16 @@ import (
 
 type Alias struct {
 	rng *rand.Rand
-	t   []fpiece
+	t   []ipiece
 	n   int32
 }
 
-type piece struct {
+type fpiece struct {
 	p float64
 	a int32
 }
 
-type fpiece struct {
+type ipiece struct {
 	p int32 // [0,2^31)
 	a int32
 }
@@ -54,14 +54,14 @@ func New(prob []float64, seed int64) (*Alias, error) {
 		total += v
 	}
 
-	al.t = make([]fpiece, n)
+	al.t = make([]ipiece, n)
 	al.n = int32(n)
 
 	// Michael Vose's algorithm
 
 	// "small" stack grows from the bottom of this array
 	// "large" stack from the top
-	twins := make([]piece, n)
+	twins := make([]fpiece, n)
 
 	smTop := -1
 	lgBot := n
@@ -76,10 +76,10 @@ func New(prob []float64, seed int64) (*Alias, error) {
 		// others in the small stack
 		if p >= 1 {
 			lgBot--
-			twins[lgBot] = piece{p, int32(i)}
+			twins[lgBot] = fpiece{p, int32(i)}
 		} else {
 			smTop++
-			twins[smTop] = piece{p, int32(i)}
+			twins[smTop] = fpiece{p, int32(i)}
 		}
 	}
 
