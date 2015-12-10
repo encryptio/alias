@@ -38,13 +38,17 @@ func New(prob []float64) (*Alias, error) {
 	n := len(prob)
 
 	if n < 1 {
-		return nil, errors.New("Too few probabilities")
+		return nil, errors.New("too few probabilities")
+	}
+
+	if int(uint32(n)) != n {
+		return nil, errors.New("too many probabilities")
 	}
 
 	total := float64(0)
 	for _, v := range prob {
 		if v <= 0 {
-			return nil, errors.New("A probability is non-positive")
+			return nil, errors.New("a probability is non-positive")
 		}
 		total += v
 	}
