@@ -126,21 +126,3 @@ func (al *Alias) Gen(rng *rand.Rand) int32 {
 	}
 	return w
 }
-
-// TableAlias returns a copy of the alias table used for generation.
-func (al *Alias) TableAlias() []int32 {
-	t := make([]int32, al.n)
-	for i := 0; i < int(al.n); i++ {
-		t[i] = al.t[i].a
-	}
-	return t
-}
-
-// TableProb returns a copy of the probability table used for generation
-func (al *Alias) TableProb() []int32 {
-	t := make([]int32, al.n)
-	for i := 0; i < int(al.n); i++ {
-		t[i] = al.t[i].p
-	}
-	return t
-}
