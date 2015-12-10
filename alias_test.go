@@ -22,6 +22,7 @@ func testDistribution(t *testing.T, dist []float64, seed int64) {
 	a, err := New(dist)
 	if err != nil {
 		t.Error("Got an error during creation:", err)
+		return
 	}
 
 	rng := rand.New(rand.NewSource(seed))
