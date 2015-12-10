@@ -13,7 +13,6 @@ import (
 
 type Alias struct {
 	t []ipiece
-	n int32
 }
 
 type fpiece struct {
@@ -52,7 +51,6 @@ func New(prob []float64) (*Alias, error) {
 
 	var al Alias
 	al.t = make([]ipiece, n)
-	al.n = int32(n)
 
 	// Michael Vose's algorithm
 
@@ -120,7 +118,7 @@ func New(prob []float64) (*Alias, error) {
 // Generates a random number according to the distribution using the rng passed.
 func (al *Alias) Gen(rng *rand.Rand) int32 {
 	ri := rng.Int31()
-	w := ri % al.n
+	w := ri % int32(len(al.t))
 	if ri > al.t[w].p {
 		return al.t[w].a
 	}
