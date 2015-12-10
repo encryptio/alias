@@ -7,6 +7,7 @@ package alias
 import (
 	"math"
 	"math/rand"
+	"reflect"
 	"testing"
 )
 
@@ -46,4 +47,33 @@ func TestDistribution(t *testing.T) {
 	testDistribution(t, []float64{9, 8, 1, 4, 2}, 5)
 	testDistribution(t, []float64{1000, 1, 3, 10}, 39)
 	testDistribution(t, []float64{1000, 1, 3, 10}, 61)
+}
+
+func TestMarshalBinary(t *testing.T) {
+	distributions := [][]float64{
+		{1},
+		{1, 1},
+		{1, 2, 3, 4, 5, 6, 7, 8, 9, 1000},
+	}
+	for _, distribution := range distributions {
+		a, err := New(distribution)
+		if err != nil {
+			t.Fatalf("Couldn't create alias: %v", err)
+		}
+
+		data, err := a.MarshalBinary()
+		if err != nil {
+			t.Fatalf("Couldn't MarshalBinary: %v", err)
+		}
+
+		a2 := &Alias{}
+		err = a2.UnmarshalBinary(data)
+		if err != nil {
+			t.Fatalf("Couldn't UnmarshalBinary: %v", err)
+		}
+
+		if !reflect.DeepEqual(a, a2) {
+			t.Fatalf("Unmarshalled version was not the same as original")
+		}
+	}
 }

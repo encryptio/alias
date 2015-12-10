@@ -7,6 +7,7 @@
 package alias
 
 import (
+	"encoding/binary"
 	"errors"
 	"math/rand"
 )
@@ -127,4 +128,45 @@ func (al *Alias) Gen(rng *rand.Rand) uint32 {
 		return al.t[w].a
 	}
 	return w
+}
+
+// MarshalBinary implements encoding.BinaryMarshaller.
+func (al *Alias) MarshalBinary() ([]byte, error) {
+	out := make([]byte, len(al.t)*8)
+	for i, piece := range al.t {
+		bin := out[i*8 : 8+i*8]
+		binary.LittleEndian.PutUint32(bin[0:4], piece.p)
+		binary.LittleEndian.PutUint32(bin[4:8], piece.a)
+	}
+	return out, nil
+}
+
+// UnmarshalBinary implements encoding.BinaryUnmarshaller.
+func (al *Alias) UnmarshalBinary(p []byte) error {
+	if len(p)%8 != 0 {
+		return errors.New("bad data length")
+	}
+
+	if int(uint32(len(p)/8)) != len(p)/8 {
+		return errors.New("data too large")
+	}
+
+	al.t = make([]ipiece, (len(p))/8)
+	for i := range al.t {
+		bin := p[i*8 : 8+i*8]
+		p := binary.LittleEndian.Uint32(bin[0:4])
+		a := binary.LittleEndian.Uint32(bin[4:8])
+
+		if p >= 1<<31 {
+			return errors.New("bad data: probability out of range")
+		}
+		if a >= uint32(len(al.t)) {
+			return errors.New("bad data: alias target out of range")
+		}
+
+		al.t[i].p = p
+		al.t[i].a = a
+	}
+
+	return nil
 }
