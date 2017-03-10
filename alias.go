@@ -83,6 +83,10 @@ func New(prob []float64) (*Alias, error) {
 		}
 	}
 
+	if lgBot != smTop + 1 {
+		panic("alias.New: internal error")
+	}
+
 	for smTop >= 0 && lgBot < n {
 		// pair off a small and large block, taking the chunk from the large block that's wanted
 		l := twins[smTop]
