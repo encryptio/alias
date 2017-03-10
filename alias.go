@@ -122,9 +122,8 @@ func New(prob []float64) (*Alias, error) {
 
 // Generates a random number according to the distribution using the rng passed.
 func (al *Alias) Gen(rng *rand.Rand) uint32 {
-	ri := uint32(rng.Int31())
-	w := ri % uint32(len(al.table))
-	if ri > al.table[w].prob {
+	w := uint32(rng.Int31n(int32(len(al.table))))
+	if uint32(rng.Int31()) > al.table[w].prob {
 		return al.table[w].alias
 	}
 	return w
