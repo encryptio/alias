@@ -14,6 +14,7 @@ import (
 
 type Alias struct {
 	table []ipiece
+	maxRi uint32
 }
 
 type fpiece struct {
@@ -24,6 +25,11 @@ type fpiece struct {
 type ipiece struct {
 	prob  uint32 // [0,2^31)
 	alias uint32
+}
+
+func calcMax(n uint32) uint32 {
+	// Taken from math/rand.Rand.Int31n source.
+	return (1 << 31) - 1 - (1<<31)%uint32(n)
 }
 
 // Create a new alias object.
@@ -83,7 +89,7 @@ func New(prob []float64) (*Alias, error) {
 		}
 	}
 
-	if lgBot != smTop + 1 {
+	if lgBot != smTop+1 {
 		panic("alias.New: internal error")
 	}
 
@@ -121,13 +127,22 @@ func New(prob []float64) (*Alias, error) {
 		al.table[twins[i].alias].prob = 1<<31 - 1
 	}
 
+	al.maxRi = calcMax(uint32(n))
+
 	return &al, nil
 }
 
 // Generates a random number according to the distribution using the rng passed.
 func (al *Alias) Gen(rng *rand.Rand) uint32 {
-	w := uint32(rng.Int31n(int32(len(al.table))))
-	if uint32(rng.Int31()) > al.table[w].prob {
+begin:
+	r := rng.Int63()
+	ri := uint32(r & (1<<31 - 1))
+	rj := uint32((r >> 31) & (1<<31 - 1))
+	if ri > al.maxRi {
+		goto begin
+	}
+	w := ri % uint32(len(al.table))
+	if rj > al.table[w].prob {
 		return al.table[w].alias
 	}
 	return w
@@ -170,6 +185,8 @@ func (al *Alias) UnmarshalBinary(p []byte) error {
 		al.table[i].prob = prob
 		al.table[i].alias = alias
 	}
+
+	al.maxRi = calcMax(uint32(len(al.table)))
 
 	return nil
 }
